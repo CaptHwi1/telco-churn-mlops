@@ -1,0 +1,10 @@
+{
+  "cv_recall": "0.978 \u00b1 0.004",
+  "cv_precision": "0.438 \u00b1 0.017",
+  "cv_f1": "0.605 \u00b1 0.016",
+  "cv_auc": "0.910 \u00b1 0.006",
+  "best_threshold": 0.1,
+  "feature_count": 39,
+  "churn_rate": 0.2653698707936959,
+  "generated_at": "2026-04-03T07:59:16.852094"
+}

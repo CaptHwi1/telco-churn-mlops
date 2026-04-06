@@ -114,9 +114,9 @@
     "payment_method_Credit Card",
     "payment_method_Mailed Check"
   ],
-  "target_col": null,
+  "target_col": "Churn Label",
   "target_mapping": null,
   "validation_enabled": true,
-  "fitted_at": "2026-04-03T07:59:13.871019",
+  "fitted_at": "2026-04-06T07:41:53.785349",
   "version": "1.0.0"
 }

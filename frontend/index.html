@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Telco Churn Prediction</title>
+    <style>
+        :root {
+            --primary: #2563eb;
+            --success: #16a34a;
+            --warning: #ca8a04;
+            --danger: #dc2626;
+            --bg: #f8fafc;
+            --card: #ffffff;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg);
+            margin: 0;
+            padding: 20px;
+            color: #1e293b;
+        }
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        @media (max-width: 768px) {
+            .container { grid-template-columns: 1fr; }
+        }
+        .card {
+            background: var(--card);
+            padding: 24px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+        }
+        h1 { grid-column: 1 / -1; text-align: center; color: var(--primary); }
+        .form-group { margin-bottom: 16px; }
+        label { display: block; margin-bottom: 6px; font-weight: 600; font-size: 14px; }
+        input, select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
+            font-size: 14px;
+            box-sizing: border-box;
+        }
+        button {
+            width: 100%;
+            padding: 12px;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        button:hover { background: #1d4ed8; }
+        button:disabled { background: #94a3b8; cursor: not-allowed; }
+        .result {
+            margin-top: 20px;
+            padding: 16px;
+            border-radius: 8px;
+            background: #f1f5f9;
+            display: none;
+        }
+        .result.high { background: #fef2f2; border-left: 4px solid var(--danger); }
+        .result.medium { background: #fefce8; border-left: 4px solid var(--warning); }
+        .result.low { background: #f0fdf4; border-left: 4px solid var(--success); }
+        .metric { display: flex; justify-content: space-between; margin-bottom: 8px; }
+        .metric-value { font-weight: 700; }
+        .loading { text-align: center; display: none; margin-top: 10px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📊 Telco Churn Prediction</h1>
+        
+        <!-- Input Form -->
+        <div class="card">
+            <h2>Customer Details</h2>
+            <form id="churnForm">
+                <div class="form-group">
+                    <label>Contract Type</label>
+                    <select id="contract" required>
+                        <option value="Month-to-Month">Month-to-Month</option>
+                        <option value="One Year">One Year</option>
+                        <option value="Two Year">Two Year</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Tenure (Months)</label>
+                    <input type="number" id="tenure" value="24" min="0" required>
+                </div>
+                <div class="form-group">
+                    <label>Monthly Charge ($)</label>
+                    <input type="number" id="charge" value="79.50" step="0.01" min="0" required>
+                </div>
+                <div class="form-group">
+                    <label>Internet Service</label>
+                    <select id="internet" required>
+                        <option value="Fiber Optic">Fiber Optic</option>
+                        <option value="DSL">DSL</option>
+                        <option value="No">No</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Online Security</label>
+                    <select id="security" required>
+                        <option value="No">No</option>
+                        <option value="Yes">Yes</option>
+                    </select>
+                </div>
+                <button type="submit" id="submitBtn">Predict Churn</button>
+                <div class="loading" id="loading">Analyzing...</div>
+            </form>
+        </div>
+
+        <!-- Results -->
+        <div class="card">
+            <h2>Prediction Result</h2>
+            <div id="result" class="result">
+                <div class="metric">
+                    <span>Churn Probability:</span>
+                    <span class="metric-value" id="probability">-</span>
+                </div>
+                <div class="metric">
+                    <span>Prediction:</span>
+                    <span class="metric-value" id="prediction">-</span>
+                </div>
+                <div class="metric">
+                    <span>Risk Level:</span>
+                    <span class="metric-value" id="risk">-</span>
+                </div>
+                <div class="metric">
+                    <span>Action:</span>
+                    <span class="metric-value" id="action" style="font-size: 12px;">-</span>
+                </div>
+                <div style="margin-top: 16px; font-size: 12px; color: #64748b;">
+                    Timestamp: <span id="timestamp">-</span>
+                </div>
+            </div>
+            <div id="placeholder" style="text-align: center; color: #94a3b8; margin-top: 40px;">
+                Fill form to see prediction
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // API Base URL (Relative for production, works with FastAPI static serving locally)
+        const API_BASE = window.location.origin;
+
+        document.getElementById('churnForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const btn = document.getElementById('submitBtn');
+            const loading = document.getElementById('loading');
+            const result = document.getElementById('result');
+            const placeholder = document.getElementById('placeholder');
+            
+            btn.disabled = true;
+            loading.style.display = 'block';
+            result.style.display = 'none';
+            placeholder.style.display = 'none';
+
+            const payload = {
+                contract: document.getElementById('contract').value,
+                tenure_in_months: parseInt(document.getElementById('tenure').value),
+                monthly_charge: parseFloat(document.getElementById('charge').value),
+                internet_service: document.getElementById('internet').value,
+                online_security: document.getElementById('security').value,
+                // Defaults for other required fields
+                gender: "Male",
+                age: 35,
+                senior_citizen: "No",
+                married: "Yes",
+                dependents: "No",
+                payment_method: "Bank Withdrawal",
+                online_backup: "Yes",
+                streaming_tv: "Yes",
+                total_charges: parseFloat(document.getElementById('charge').value) * parseInt(document.getElementById('tenure').value)
+            };
+
+            try {
+                const response = await fetch(`${API_BASE}/api/predict`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                if (!response.ok) throw new Error(`API Error: ${response.status}`);
+
+                const data = await response.json();
+                
+                document.getElementById('probability').textContent = (data.churn_probability * 100).toFixed(1) + '%';
+                document.getElementById('prediction').textContent = data.prediction;
+                document.getElementById('risk').textContent = data.risk_level;
+                document.getElementById('action').textContent = data.recommended_action;
+                document.getElementById('timestamp').textContent = new Date(data.timestamp).toLocaleString();
+
+                result.className = 'result ' + data.risk_level.toLowerCase();
+                result.style.display = 'block';
+            } catch (error) {
+                alert('Prediction failed: ' + error.message);
+                placeholder.style.display = 'block';
+            } finally {
+                btn.disabled = false;
+                loading.style.display = 'none';
+            }
+        });
+    </script>
+</body>
+</html>

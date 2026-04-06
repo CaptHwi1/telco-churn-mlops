@@ -1,0 +1,77 @@
+# =============================================================================
+# Telco Churn MLOps - Git Ignore Rules (DEPLOYMENT READY)
+# =============================================================================
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+dist/
+*.egg-info/
+.venv/
+mlops_env/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+!artifacts/api.log
+
+# MLflow (OK to ignore - tracking data)
+mlruns/
+mlflow.db
+
+# -----------------------------------------------------------------------------
+# CRITICAL: Allow artifacts needed for Docker build
+# -----------------------------------------------------------------------------
+# Block large binaries BUT allow config files
+artifacts/*.png
+artifacts/*.jpg
+
+# ALLOW these (needed for API):
+!artifacts/serving_config.json
+!artifacts/preprocessing_metadata.json
+!artifacts/model.pkl
+!artifacts/preprocessing_pipeline.joblib
+
+# Models
+models/*.pkl
+models/*.joblib
+!models/.gitkeep
+
+# Data (DO NOT COMMIT)
+data/raw/*.csv
+data/processed/
+
+# Secrets (NEVER COMMIT)
+.env
+.env.local
+*.key
+*.pem
+kubeconfig
+kubeconfig.json
+
+# Docker
+docker-compose.override.yml
+
+# Kubernetes Secrets
+k8s/*secret*.yaml
+k8s/*-secrets.yaml
+
+# GitHub Actions
+.github/workflows/local-*.yml
+
+# OS Files
+.DS_Store
+Thumbs.db

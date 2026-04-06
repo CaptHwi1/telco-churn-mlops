@@ -1,0 +1,15 @@
+# =============================================================================
+# KUBERNETES NAMESPACE FOR TELCO CHURN
+# =============================================================================
+
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: telco-churn
+  labels:
+    app: telco-churn
+    environment: production
+    team: data-science
+  annotations:
+    description: "Namespace for Telco Churn Prediction Application"
+    owner: "mlops-team"

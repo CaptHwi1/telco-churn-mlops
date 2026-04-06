@@ -1,53 +1,144 @@
-2026-04-04 13:04:07,613 - src.serving.api - INFO - >> Starting API server on 0.0.0.0:8000
-2026-04-04 13:04:14,643 - src.serving.api - INFO - >> Starting Telco Churn Prediction API...
-2026-04-04 13:04:14,648 - src.serving.api - INFO -   [OK] Preprocessing pipeline loaded
-2026-04-04 13:04:14,660 - src.serving.api - INFO -   [OK] Serving config loaded
-2026-04-04 13:04:15,773 - src.serving.api - WARNING -   [WARN] Could not load from MLflow registry (Production): Registered Model with name=telco_churn_model_tuned not found
-2026-04-04 13:04:15,777 - src.serving.api - WARNING -   [WARN] Could not load from MLflow registry (Staging): Registered Model with name=telco_churn_model_tuned not found
-2026-04-04 13:04:15,809 - src.serving.api - INFO -   [OK] Model loaded from local joblib: artifacts\model.pkl
-2026-04-04 13:04:15,809 - src.serving.api - INFO -   [OK] API startup complete
-2026-04-04 13:15:53,036 - src.serving.api - INFO -  Shutting down Telco Churn Prediction API...
-2026-04-04 13:16:10,089 - src.serving.api - INFO - >> Starting API server on 0.0.0.0:8000
-2026-04-04 13:16:22,308 - src.serving.api - INFO - >> Starting Telco Churn Prediction API...
-2026-04-04 13:16:22,316 - src.serving.api - INFO -   [OK] Preprocessing pipeline loaded
-2026-04-04 13:16:22,317 - src.serving.api - INFO -   [OK] Serving config loaded
-2026-04-04 13:16:23,928 - src.serving.api - WARNING -   [WARN] Could not load from MLflow registry (Production): Registered Model with name=telco_churn_model_tuned not found
-2026-04-04 13:16:23,934 - src.serving.api - WARNING -   [WARN] Could not load from MLflow registry (Staging): Registered Model with name=telco_churn_model_tuned not found
-2026-04-04 13:16:23,944 - src.serving.api - INFO -   [OK] Model loaded from local joblib: artifacts\model.pkl
-2026-04-04 13:16:23,944 - src.serving.api - INFO -   [OK] API startup complete
-2026-04-04 13:19:23,242 - src.serving.api - INFO -  Shutting down Telco Churn Prediction API...
-2026-04-04 13:19:32,989 - src.serving.api - INFO - >> Starting API server on 0.0.0.0:8000
-2026-04-04 13:19:40,348 - src.serving.api - INFO - >> Starting Telco Churn Prediction API...
-2026-04-04 13:19:40,353 - src.serving.api - INFO -   [OK] Preprocessing pipeline loaded
-2026-04-04 13:19:40,354 - src.serving.api - INFO -   [OK] Serving config loaded
-2026-04-04 13:19:41,605 - src.serving.api - WARNING -   [WARN] Could not load from MLflow registry (Production): Registered Model with name=telco_churn_model_tuned not found
-2026-04-04 13:19:41,612 - src.serving.api - WARNING -   [WARN] Could not load from MLflow registry (Staging): Registered Model with name=telco_churn_model_tuned not found
-2026-04-04 13:19:41,619 - src.serving.api - INFO -   [OK] Model loaded from local joblib: artifacts\model.pkl
-2026-04-04 13:19:41,620 - src.serving.api - INFO -   [OK] API startup complete
-2026-04-04 13:54:03,044 - src.serving.api - INFO -  Shutting down Telco Churn Prediction API...
-2026-04-04 13:54:13,390 - src.serving.api - INFO - >> Starting Telco Churn Prediction API...
-2026-04-04 13:54:13,396 - src.serving.api - INFO -   [OK] Preprocessing pipeline loaded
-2026-04-04 13:54:13,397 - src.serving.api - INFO -   [OK] Serving config loaded
-2026-04-04 13:54:14,752 - src.serving.api - WARNING -   [WARN] Could not load from MLflow registry (Production): Registered Model with name=telco_churn_model_tuned not found
-2026-04-04 13:54:14,755 - src.serving.api - WARNING -   [WARN] Could not load from MLflow registry (Staging): Registered Model with name=telco_churn_model_tuned not found
-2026-04-04 13:54:14,763 - src.serving.api - INFO -   [OK] Model loaded from local joblib: artifacts\model.pkl
-2026-04-04 13:54:14,763 - src.serving.api - INFO -   [OK] API startup complete
-2026-04-04 13:58:32,034 - src.serving.api - INFO -  Shutting down Telco Churn Prediction API...
-2026-04-05 07:10:11,004 - src.serving.api - INFO - >> Starting API server on 0.0.0.0:8000
-2026-04-05 07:10:19,784 - src.serving.api - INFO - >> Starting Telco Churn Prediction API...
-2026-04-05 07:10:19,812 - src.serving.api - INFO -   [OK] Preprocessing pipeline loaded
-2026-04-05 07:10:19,825 - src.serving.api - INFO -   [OK] Serving config loaded
-2026-04-05 07:10:21,307 - src.serving.api - WARNING -   [WARN] Could not load from MLflow registry (Production): Registered Model with name=telco_churn_model_tuned not found
-2026-04-05 07:10:21,313 - src.serving.api - WARNING -   [WARN] Could not load from MLflow registry (Staging): Registered Model with name=telco_churn_model_tuned not found
-2026-04-05 07:10:21,375 - src.serving.api - INFO -   [OK] Model loaded from local joblib: artifacts\model.pkl
-2026-04-05 07:10:21,376 - src.serving.api - INFO -   [OK] API startup complete
-2026-04-05 07:27:43,192 - src.serving.api - INFO -  Shutting down Telco Churn Prediction API...
-2026-04-05 07:29:06,172 - src.serving.api - INFO - >> Starting API server on 0.0.0.0:8000
-2026-04-05 07:29:15,365 - src.serving.api - INFO - >> Starting Telco Churn Prediction API...
-2026-04-05 07:29:15,375 - src.serving.api - INFO -   [OK] Preprocessing pipeline loaded
-2026-04-05 07:29:15,376 - src.serving.api - INFO -   [OK] Serving config loaded
-2026-04-05 07:29:16,985 - src.serving.api - WARNING -   [WARN] Could not load from MLflow registry (Production): Registered Model with name=telco_churn_model_tuned not found
-2026-04-05 07:29:16,990 - src.serving.api - WARNING -   [WARN] Could not load from MLflow registry (Staging): Registered Model with name=telco_churn_model_tuned not found
-2026-04-05 07:29:16,997 - src.serving.api - INFO -   [OK] Model loaded from local joblib: artifacts\model.pkl
-2026-04-05 07:29:16,997 - src.serving.api - INFO -   [OK] API startup complete
-2026-04-05 08:47:06,707 - src.serving.api - INFO -  Shutting down Telco Churn Prediction API...
+2026-04-06 10:08:27,793 - src.serving.api - INFO - Loading artifacts from: C:\Users\user\Desktop\Library\Work\Journey to Agentic_AI MLOps\Files\E2E project\Project churn\churn-scratch\Telco-churn\artifacts
+2026-04-06 10:08:27,807 - src.serving.api - INFO - ✅ Preprocessing pipeline loaded | Features: 39
+2026-04-06 10:08:27,809 - src.serving.api - INFO - ✅ Serving config loaded
+2026-04-06 10:08:27,831 - src.serving.api - INFO - ✅ Model loaded from model.pkl
+2026-04-06 10:10:51,623 - src.serving.api - ERROR - Transform error: 'number_of_referrals'
+Traceback (most recent call last):
+  File "C:\Users\user\anaconda3.1\envs\mlops_env\Lib\site-packages\pandas\core\indexes\base.py", line 3812, in get_loc
+    return self._engine.get_loc(casted_key)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^
+  File "pandas/_libs/index.pyx", line 167, in pandas._libs.index.IndexEngine.get_loc
+  File "pandas/_libs/index.pyx", line 196, in pandas._libs.index.IndexEngine.get_loc
+  File "pandas/_libs/hashtable_class_helper.pxi", line 7088, in pandas._libs.hashtable.PyObjectHashTable.get_item
+  File "pandas/_libs/hashtable_class_helper.pxi", line 7096, in pandas._libs.hashtable.PyObjectHashTable.get_item
+KeyError: 'number_of_referrals'
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\user\Desktop\Library\Work\Journey to Agentic_AI MLOps\Files\E2E project\Project churn\churn-scratch\Telco-churn\src\serving\api.py", line 221, in _transform_for_prediction
+    df_complete = _add_missing_features(df_std)
+  File "C:\Users\user\Desktop\Library\Work\Journey to Agentic_AI MLOps\Files\E2E project\Project churn\churn-scratch\Telco-churn\src\serving\api.py", line 209, in _add_missing_features
+    df[col] = defaults.get(col, 'No' if df[col].dtype == 'object' else 0)
+                                        ~~^^^^^
+  File "C:\Users\user\anaconda3.1\envs\mlops_env\Lib\site-packages\pandas\core\frame.py", line 4113, in __getitem__
+    indexer = self.columns.get_loc(key)
+  File "C:\Users\user\anaconda3.1\envs\mlops_env\Lib\site-packages\pandas\core\indexes\base.py", line 3819, in get_loc
+    raise KeyError(key) from err
+KeyError: 'number_of_referrals'
+2026-04-06 10:10:51,818 - src.serving.api - ERROR - Prediction error: 'number_of_referrals'
+Traceback (most recent call last):
+  File "C:\Users\user\anaconda3.1\envs\mlops_env\Lib\site-packages\pandas\core\indexes\base.py", line 3812, in get_loc
+    return self._engine.get_loc(casted_key)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^
+  File "pandas/_libs/index.pyx", line 167, in pandas._libs.index.IndexEngine.get_loc
+  File "pandas/_libs/index.pyx", line 196, in pandas._libs.index.IndexEngine.get_loc
+  File "pandas/_libs/hashtable_class_helper.pxi", line 7088, in pandas._libs.hashtable.PyObjectHashTable.get_item
+  File "pandas/_libs/hashtable_class_helper.pxi", line 7096, in pandas._libs.hashtable.PyObjectHashTable.get_item
+KeyError: 'number_of_referrals'
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\user\Desktop\Library\Work\Journey to Agentic_AI MLOps\Files\E2E project\Project churn\churn-scratch\Telco-churn\src\serving\api.py", line 293, in predict_churn
+    X_transformed = _transform_for_prediction(df_input)
+  File "C:\Users\user\Desktop\Library\Work\Journey to Agentic_AI MLOps\Files\E2E project\Project churn\churn-scratch\Telco-churn\src\serving\api.py", line 221, in _transform_for_prediction
+    df_complete = _add_missing_features(df_std)
+  File "C:\Users\user\Desktop\Library\Work\Journey to Agentic_AI MLOps\Files\E2E project\Project churn\churn-scratch\Telco-churn\src\serving\api.py", line 209, in _add_missing_features
+    df[col] = defaults.get(col, 'No' if df[col].dtype == 'object' else 0)
+                                        ~~^^^^^
+  File "C:\Users\user\anaconda3.1\envs\mlops_env\Lib\site-packages\pandas\core\frame.py", line 4113, in __getitem__
+    indexer = self.columns.get_loc(key)
+  File "C:\Users\user\anaconda3.1\envs\mlops_env\Lib\site-packages\pandas\core\indexes\base.py", line 3819, in get_loc
+    raise KeyError(key) from err
+KeyError: 'number_of_referrals'
+2026-04-06 10:10:51,823 - src.serving.api - WARNING - HTTP 500: Prediction failed: 'number_of_referrals'
+2026-04-06 10:10:51,824 - src.serving.api - ERROR - Unexpected error: 'dict' object is not callable
+Traceback (most recent call last):
+  File "C:\Users\user\anaconda3.1\envs\mlops_env\Lib\site-packages\pandas\core\indexes\base.py", line 3812, in get_loc
+    return self._engine.get_loc(casted_key)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^
+  File "pandas/_libs/index.pyx", line 167, in pandas._libs.index.IndexEngine.get_loc
+  File "pandas/_libs/index.pyx", line 196, in pandas._libs.index.IndexEngine.get_loc
+  File "pandas/_libs/hashtable_class_helper.pxi", line 7088, in pandas._libs.hashtable.PyObjectHashTable.get_item
+  File "pandas/_libs/hashtable_class_helper.pxi", line 7096, in pandas._libs.hashtable.PyObjectHashTable.get_item
+KeyError: 'number_of_referrals'
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\user\Desktop\Library\Work\Journey to Agentic_AI MLOps\Files\E2E project\Project churn\churn-scratch\Telco-churn\src\serving\api.py", line 293, in predict_churn
+    X_transformed = _transform_for_prediction(df_input)
+  File "C:\Users\user\Desktop\Library\Work\Journey to Agentic_AI MLOps\Files\E2E project\Project churn\churn-scratch\Telco-churn\src\serving\api.py", line 221, in _transform_for_prediction
+    df_complete = _add_missing_features(df_std)
+  File "C:\Users\user\Desktop\Library\Work\Journey to Agentic_AI MLOps\Files\E2E project\Project churn\churn-scratch\Telco-churn\src\serving\api.py", line 209, in _add_missing_features
+    df[col] = defaults.get(col, 'No' if df[col].dtype == 'object' else 0)
+                                        ~~^^^^^
+  File "C:\Users\user\anaconda3.1\envs\mlops_env\Lib\site-packages\pandas\core\frame.py", line 4113, in __getitem__
+    indexer = self.columns.get_loc(key)
+  File "C:\Users\user\anaconda3.1\envs\mlops_env\Lib\site-packages\pandas\core\indexes\base.py", line 3819, in get_loc
+    raise KeyError(key) from err
+KeyError: 'number_of_referrals'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\user\anaconda3.1\envs\mlops_env\Lib\site-packages\starlette\_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "C:\Users\user\anaconda3.1\envs\mlops_env\Lib\site-packages\fastapi\routing.py", line 120, in app
+    response = await f(request)
+               ^^^^^^^^^^^^^^^^
+  File "C:\Users\user\anaconda3.1\envs\mlops_env\Lib\site-packages\fastapi\routing.py", line 674, in app
+    raw_response = await run_endpoint_function(
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+    )
+    ^
+  File "C:\Users\user\anaconda3.1\envs\mlops_env\Lib\site-packages\fastapi\routing.py", line 328, in run_endpoint_function
+    return await dependant.call(**values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\user\Desktop\Library\Work\Journey to Agentic_AI MLOps\Files\E2E project\Project churn\churn-scratch\Telco-churn\src\serving\api.py", line 332, in predict_churn
+    raise HTTPException(status_code=500, detail=f"Prediction failed: {str(e)}")
+fastapi.exceptions.HTTPException: 500: Prediction failed: 'number_of_referrals'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\user\anaconda3.1\envs\mlops_env\Lib\site-packages\starlette\middleware\errors.py", line 164, in __call__
+    await self.app(scope, receive, _send)
+  File "C:\Users\user\anaconda3.1\envs\mlops_env\Lib\site-packages\starlette\middleware\exceptions.py", line 63, in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+  File "C:\Users\user\anaconda3.1\envs\mlops_env\Lib\site-packages\starlette\_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "C:\Users\user\anaconda3.1\envs\mlops_env\Lib\site-packages\starlette\_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "C:\Users\user\anaconda3.1\envs\mlops_env\Lib\site-packages\fastapi\middleware\asyncexitstack.py", line 18, in __call__
+    await self.app(scope, receive, send)
+  File "C:\Users\user\anaconda3.1\envs\mlops_env\Lib\site-packages\starlette\routing.py", line 660, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "C:\Users\user\anaconda3.1\envs\mlops_env\Lib\site-packages\starlette\routing.py", line 680, in app
+    await route.handle(scope, receive, send)
+  File "C:\Users\user\anaconda3.1\envs\mlops_env\Lib\site-packages\starlette\routing.py", line 276, in handle
+    await self.app(scope, receive, send)
+  File "C:\Users\user\anaconda3.1\envs\mlops_env\Lib\site-packages\fastapi\routing.py", line 134, in app
+    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+  File "C:\Users\user\anaconda3.1\envs\mlops_env\Lib\site-packages\starlette\_exception_handler.py", line 63, in wrapped_app
+    await response(scope, receive, sender)
+          ~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: 'dict' object is not callable
+2026-04-06 10:14:15,254 - src.serving.api - INFO - Loading artifacts from: C:\Users\user\Desktop\Library\Work\Journey to Agentic_AI MLOps\Files\E2E project\Project churn\churn-scratch\Telco-churn\artifacts
+2026-04-06 10:14:15,270 - src.serving.api - INFO - ✅ Preprocessing pipeline loaded | Features: 39
+2026-04-06 10:14:15,272 - src.serving.api - INFO - ✅ Serving config loaded
+2026-04-06 10:14:15,284 - src.serving.api - INFO - ✅ Model loaded from model.pkl
+2026-04-06 10:21:51,681 - src.serving.api - INFO - Loading artifacts from: C:\Users\user\Desktop\Library\Work\Journey to Agentic_AI MLOps\Files\E2E project\Project churn\churn-scratch\Telco-churn\artifacts
+2026-04-06 10:21:51,691 - src.serving.api - INFO - ✅ Preprocessing pipeline loaded | Features: 39
+2026-04-06 10:21:51,693 - src.serving.api - INFO - ✅ Serving config loaded
+2026-04-06 10:21:51,713 - src.serving.api - INFO - ✅ Model loaded from model.pkl
+2026-04-06 10:23:18,583 - src.serving.api - INFO - Loading artifacts from: C:\Users\user\Desktop\Library\Work\Journey to Agentic_AI MLOps\Files\E2E project\Project churn\churn-scratch\Telco-churn\artifacts
+2026-04-06 10:23:18,595 - src.serving.api - INFO - ✅ Preprocessing pipeline loaded | Features: 39
+2026-04-06 10:23:18,597 - src.serving.api - INFO - ✅ Serving config loaded
+2026-04-06 10:23:18,617 - src.serving.api - INFO - ✅ Model loaded from model.pkl
+2026-04-06 10:24:39,345 - src.serving.api - INFO - 📦 Batch prediction request: 2 items
+2026-04-06 10:24:39,481 - src.serving.api - INFO - ✅ Batch complete: 2 processed, 0 errors, 136.81ms
+2026-04-06 10:28:26,104 - src.serving.api - INFO - 📦 Batch prediction request: 2 items
+2026-04-06 10:28:26,254 - src.serving.api - INFO - ✅ Batch complete: 2 processed, 0 errors, 150.01ms

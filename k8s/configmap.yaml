@@ -1,0 +1,22 @@
+# =============================================================================
+# KUBERNETES CONFIGMAP FOR TELCO CHURN
+# Application configuration (non-sensitive)
+# =============================================================================
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: telco-churn-config
+  namespace: telco-churn
+  labels:
+    app: telco-churn
+data:
+  ENVIRONMENT: "production"
+  LOG_LEVEL: "INFO"
+  API_HOST: "0.0.0.0"
+  API_PORT: "8000"
+  ARTIFACTS_PATH: "/app/artifacts"
+  # MLFLOW_TRACKING_URI: "http://mlflow-service:5000"  # Uncomment if using MLflow in cluster
+  # MLFLOW_TRACKING_USERNAME: "admin"  # Use secrets for credentials
+  PYTHONUNBUFFERED: "1"
+  PYTHONDONTWRITEBYTECODE: "1"

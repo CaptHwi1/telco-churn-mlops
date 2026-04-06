@@ -1,0 +1,127 @@
+# =============================================================================
+# KUBERNETES DEPLOYMENT FOR TELCO CHURN API
+# Huawei Cloud CCE Compatible
+# =============================================================================
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: telco-churn-api
+  namespace: telco-churn
+  labels:
+    app: telco-churn-api
+    version: v1
+    environment: production
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: telco-churn-api
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  template:
+    metadata:
+      labels:
+        app: telco-churn-api
+        version: v1
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "8000"
+        prometheus.io/path: "/metrics"
+    spec:
+      # Pull secrets for Huawei SWR
+      imagePullSecrets:
+      - name: swr-secret
+      
+      containers:
+      - name: api
+        # UPDATE THIS IMAGE TAG AFTER BUILD
+        image: swr.cn-north-4.myhuaweicloud.com/telco-churn/telco-churn-api:latest
+        imagePullPolicy: Always
+        
+        ports:
+        - containerPort: 80
+          name: http
+          protocol: TCP
+        
+        # Environment from ConfigMap
+        envFrom:
+        - configMapRef:
+            name: telco-churn-config
+        
+        # Resource limits
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "250m"
+          limits:
+            memory: "1Gi"
+            cpu: "500m"
+        
+        # Liveness probe
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 80
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+        
+        # Readiness probe
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 80
+          initialDelaySeconds: 10
+          periodSeconds: 5
+          timeoutSeconds: 3
+          failureThreshold: 3
+        
+        # Volume mounts
+        volumeMounts:
+        - name: tmp-volume
+          mountPath: /app/tmp
+        - name: log-volume
+          mountPath: /app/logs
+      
+      # Volumes
+      volumes:
+      - name: tmp-volume
+        emptyDir: {}
+      - name: log-volume
+        emptyDir: {}
+      
+      # Pod anti-affinity for high availability
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 100
+            podAffinityTerm:
+              labelSelector:
+                matchExpressions:
+                - key: app
+                  operator: In
+                  values:
+                  - telco-churn-api
+              topologyKey: kubernetes.io/hostname
+      
+      # Node selector (optional - for specific node pools)
+      # nodeSelector:
+      #   node-type: application
+      
+      # Tolerations (optional - for tainted nodes)
+      # tolerations:
+      # - key: "dedicated"
+      #   operator: "Equal"
+      #   value: "application"
+      #   effect: "NoSchedule"
+      
+      # Restart policy
+      restartPolicy: Always
+      
+      # Termination grace period
+      terminationGracePeriodSeconds: 30

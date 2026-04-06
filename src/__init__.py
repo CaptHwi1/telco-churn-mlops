@@ -1,0 +1,3 @@
+"""Telco Churn MLOps Project Package."""
+
+__version__ = "1.0.0"

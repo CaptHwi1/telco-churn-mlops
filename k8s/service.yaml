@@ -1,0 +1,49 @@
+# =============================================================================
+# KUBERNETES SERVICE FOR TELCO CHURN API
+# Huawei Cloud ELB Configuration
+# =============================================================================
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: telco-churn-api
+  namespace: telco-churn
+  labels:
+    app: telco-churn-api
+  annotations:
+    # Huawei Cloud ELB Configuration
+    kubernetes.io/elb.class: union
+    kubernetes.io/elb.autocreate: |
+      {
+        "type": "public",
+        "bandwidth_charge_mode": "traffic",
+        "bandwidth_size": 10,
+        "share_type": "PER",
+        "ip_type": "5_bgp",
+        "eip_type": "5_bgp"
+      }
+    # Optional: Add IP whitelist for security
+    # kubernetes.io/elb.whitelist.enable: "true"
+    # kubernetes.io/elb.whitelist: "your.office.ip/32,ci-server.ip/32"
+    # Optional: Add health check configuration
+    kubernetes.io/elb.health-check: |
+      {
+        "protocol": "HTTP",
+        "path": "/health",
+        "delay": 5,
+        "timeout": 3,
+        "max_retries": 3
+      }
+spec:
+  type: LoadBalancer
+  selector:
+    app: telco-churn-api
+  ports:
+  - name: http
+    port: 80
+    targetPort: 80
+    protocol: TCP
+    nodePort: null
+  sessionAffinity: None
+  # Optional: External traffic policy
+  # externalTrafficPolicy: Cluster

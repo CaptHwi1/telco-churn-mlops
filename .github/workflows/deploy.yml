@@ -91,7 +91,7 @@ jobs:
         run: |
           docker push ${{ env.REGISTRY }}/${{ env.ORG }}/${{ env.APP }}:latest
           docker push ${{ env.REGISTRY }}/${{ env.ORG }}/${{ env.APP }}:sha-${{ github.sha }}
-          docker push ${{ env.REGISTRY }}/${{ env.ORG }}/${{ env.APP }}:v1.0.0
+          docker push ${{ env.REGISTRY }}/${{ env.ORG }}/${{ env.APP }}:v1.1.0
 
       - name: Success
         run: echo "✅ Image pushed to SWR"

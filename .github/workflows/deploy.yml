@@ -54,7 +54,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      # ✅ Use pre-installed Docker
+      #  Use pre-installed Docker
       - name: Verify Docker
         run: docker --version
 
@@ -73,7 +73,7 @@ jobs:
           tags: |
             type=sha,prefix=sha-
             type=raw,value=latest
-            type=raw,value=v1.0.0
+            type=raw,value=v1.1.0
 
       # ✅ Classic docker build
       - name: Build Docker image
@@ -81,7 +81,7 @@ jobs:
           docker build \
             -t ${{ env.REGISTRY }}/${{ env.ORG }}/${{ env.APP }}:latest \
             -t ${{ env.REGISTRY }}/${{ env.ORG }}/${{ env.APP }}:sha-${{ github.sha }} \
-            -t ${{ env.REGISTRY }}/${{ env.ORG }}/${{ env.APP }}:v1.0.0 \
+            -t ${{ env.REGISTRY }}/${{ env.ORG }}/${{ env.APP }}:v1.1.0 \
             -f docker/Dockerfile \
             --platform linux/amd64 \
             .

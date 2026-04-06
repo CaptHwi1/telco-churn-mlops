@@ -1,14 +1,14 @@
 """
 FastAPI application for Telco Churn prediction serving.
 Serves both API endpoints and Frontend static files for local development.
-Supports single and batch predictions.
+Supports single and batch predictions with explainable risk scoring.
 """
 
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.responses import FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field, ValidationError
-from typing import Optional, List
+from typing import Optional, List, Dict, Any
 import pandas as pd
 import numpy as np
 import joblib
@@ -37,8 +37,8 @@ logger = logging.getLogger(__name__)
 
 app = FastAPI(
     title="Telco Churn Prediction API",
-    description="Production API for predicting customer churn with batch support",
-    version="1.0.0"
+    description="Production API for predicting customer churn with explainable risk scoring",
+    version="1.1.0"
 )
 
 # Global variables
@@ -125,8 +125,8 @@ class ChurnPredictionRequest(BaseModel):
     age: int = Field(..., ge=0, le=120, example=35)
     tenure_in_months: int = Field(..., ge=0, example=24)
     contract: str = Field(..., example="Month-to-Month")
-    monthly_charge: float = Field(..., ge=0, example=79.5)
-    total_charges: float = Field(..., ge=0, example=1868.0)
+    monthly_charge: float = Field(..., ge=0, example="79.5")
+    total_charges: float = Field(..., ge=0, example="1868.0")
     internet_service: str = Field(..., example="Fiber Optic")
     online_security: str = Field(..., example="No")
     online_backup: str = Field(..., example="Yes")
@@ -158,14 +158,36 @@ class ChurnPredictionRequest(BaseModel):
     total_extra_data_charges: float = 0.0
 
 
+class FactorDetail(BaseModel):
+    """Detailed explanation of a single factor's impact."""
+    value: Any
+    contribution: float
+    impact: str  # "increases risk" or "decreases risk"
+    context: str
+
+
+class RiskExplanation(BaseModel):
+    """Detailed explanation of risk assessment."""
+    risk_level: str  # "Low", "Medium", "High"
+    primary_factors: List[str]  # Top 3 factors driving the risk
+    factor_details: Dict[str, FactorDetail]  # Detailed factor analysis
+    recommendation: str  # Actionable recommendation
+    confidence_score: float  # Model confidence (0-1)
+
+
 class ChurnPredictionResponse(BaseModel):
     customer_id: Optional[str]
     churn_probability: float
-    prediction: str
+    prediction: str  # "Yes" or "No"
+    
+    # Risk assessment with explanation
     risk_level: str
+    risk_explanation: RiskExplanation  # Detailed explanation
+    
     confidence: float
     recommended_action: str
     timestamp: str
+    feature_contributions: Optional[Dict[str, FactorDetail]] = None  # Optional detailed view
 
 
 class BatchPredictionRequest(BaseModel):
@@ -183,8 +205,235 @@ class BatchPredictionResponse(BaseModel):
 
 
 # =============================================================================
-# HELPER FUNCTIONS
+# HELPER FUNCTIONS: RISK EXPLANATION
 # =============================================================================
+
+def _estimate_feature_contributions(
+    input_data: dict,
+    feature_names: List[str],
+    model,
+    X_transformed: pd.DataFrame
+) -> Dict[str, float]:
+    """
+    Estimate feature contributions to prediction.
+    Simplified approach using model feature_importances_ weighted by input values.
+    For production: Replace with SHAP values.
+    """
+    contributions = {}
+    
+    # Get model feature importances
+    if hasattr(model, 'feature_importances_'):
+        importances = model.feature_importances_
+    else:
+        # Fallback: uniform importance
+        importances = np.ones(len(feature_names)) / len(feature_names) if feature_names else []
+    
+    # Map importances to input features (simplified mapping)
+    for i, feature in enumerate(feature_names[:len(importances)]):
+        # Get original feature name (before encoding)
+        base_feature = feature.split('_')[0] if '_' in feature else feature
+        
+        # Estimate contribution: importance * normalized input value
+        input_val = input_data.get(base_feature, 0)
+        if isinstance(input_val, (int, float)):
+            # Numeric: simple normalization
+            normalized = min(1.0, max(-1.0, (input_val - 50) / 50))
+            contributions[base_feature] = float(importances[i] * normalized)
+        else:
+            # Categorical: use fixed contribution
+            contributions[base_feature] = float(importances[i] * 0.3)
+    
+    return contributions
+
+
+def _explain_feature_impact(
+    feature: str, 
+    contribution: float, 
+    value: any
+) -> Dict[str, str]:
+    """Generate human-readable explanation for a feature's impact."""
+    
+    impact = "increases risk" if contribution > 0 else "decreases risk"
+    
+    # Feature-specific business context explanations
+    explanations = {
+        'contract': {
+            'Month-to-Month': "Short-term contracts have higher churn rates due to flexibility",
+            'One Year': "Annual contracts show moderate retention with some flexibility",
+            'Two Year': "Long-term contracts strongly reduce churn risk through commitment"
+        },
+        'tenure_in_months': {
+            'low': "New customers (<12 months) are more likely to churn during evaluation period",
+            'medium': "Established customers (12-24 months) show moderate retention patterns",
+            'high': "Long-tenure customers (>24 months) are highly loyal and less likely to churn"
+        },
+        'monthly_charge': {
+            'high': "Higher monthly charges correlate with increased churn risk due to cost sensitivity",
+            'medium': "Moderate charges show balanced retention with acceptable value perception",
+            'low': "Lower charges are associated with customer loyalty and price satisfaction"
+        },
+        'internet_service': {
+            'Fiber Optic': "Fiber Optic users have higher churn due to service quality expectations",
+            'DSL': "DSL users show moderate retention with stable but slower service",
+            'No': "No internet service indicates low engagement and different customer segment"
+        },
+        'online_security': {
+            'Yes': "Having online security reduces churn risk through added value perception",
+            'No': "Lacking security features increases vulnerability to competitive offers"
+        },
+        'online_backup': {
+            'Yes': "Online backup adoption indicates higher engagement and reduces churn",
+            'No': "Missing backup services may indicate lower service utilization"
+        },
+        'streaming_tv': {
+            'Yes': "Streaming TV usage increases engagement but also competitive switching risk",
+            'No': "No streaming may indicate lower service dependency"
+        }
+    }
+    
+    # Get context based on feature and value
+    if feature in explanations and isinstance(value, str):
+        context = explanations[feature].get(value, "Impact based on historical churn patterns")
+    elif feature == 'tenure_in_months' and isinstance(value, (int, float)):
+        if value < 12:
+            context = explanations['tenure_in_months']['low']
+        elif value < 24:
+            context = explanations['tenure_in_months']['medium']
+        else:
+            context = explanations['tenure_in_months']['high']
+    elif feature == 'monthly_charge' and isinstance(value, (int, float)):
+        if value > 80:
+            context = explanations['monthly_charge']['high']
+        elif value > 50:
+            context = explanations['monthly_charge']['medium']
+        else:
+            context = explanations['monthly_charge']['low']
+    else:
+        context = "Contributes to risk assessment based on model patterns"
+    
+    return {
+        'summary': f"{feature.replace('_', ' ').title()}: {impact}",
+        'impact': impact,
+        'context': context
+    }
+
+
+def _build_recommendation(
+    risk_level: str, 
+    primary_factors: List[str], 
+    input_data: dict
+) -> str:
+    """Build personalized recommendation based on risk factors."""
+    
+    base_actions = {
+        'High': "Offer retention discount immediately",
+        'Medium': "Send engagement email with personalized offer",
+        'Low': "Continue standard engagement; monitor for changes"
+    }
+    
+    # Add factor-specific suggestions
+    suggestions = []
+    
+    if any('contract' in f.lower() for f in primary_factors):
+        suggestions.append("Consider contract upgrade incentives")
+    
+    if any('charge' in f.lower() for f in primary_factors):
+        suggestions.append("Review pricing plan options for better value")
+    
+    if any('tenure' in f.lower() for f in primary_factors):
+        suggestions.append("Implement targeted onboarding for new customers")
+    
+    if any('internet' in f.lower() for f in primary_factors):
+        suggestions.append("Proactively address service quality concerns")
+    
+    if any('security' in f.lower() or 'backup' in f.lower() for f in primary_factors):
+        suggestions.append("Highlight value-added features in communications")
+    
+    if any('streaming' in f.lower() for f in primary_factors):
+        suggestions.append("Offer content bundle promotions")
+    
+    # Combine base action with suggestions
+    base = base_actions.get(risk_level, base_actions['Medium'])
+    
+    if suggestions:
+        return f"{base}. Additionally: {'; '.join(suggestions[:2])}"
+    
+    return base
+
+
+def _calculate_risk_explanation(
+    proba: float, 
+    input_data: dict, 
+    feature_names: List[str],
+    model,
+    X_transformed: pd.DataFrame
+) -> RiskExplanation:
+    """
+    Generate human-readable explanation for risk assessment.
+    
+    Args:
+        proba: Churn probability (0-1)
+        input_ Original input features
+        feature_names: List of feature names after preprocessing
+        model: Trained model for feature importance
+        X_transformed: Transformed input for prediction
+        
+    Returns:
+        RiskExplanation object with detailed analysis
+    """
+    
+    # Determine risk level
+    if proba >= 0.7:
+        risk_level = "High"
+    elif proba >= 0.4:
+        risk_level = "Medium"
+    else:
+        risk_level = "Low"
+    
+    # Calculate feature contributions
+    factor_contributions = _estimate_feature_contributions(
+        input_data, feature_names, model, X_transformed
+    )
+    
+    # Get top 3 driving factors by absolute contribution
+    sorted_factors = sorted(
+        factor_contributions.items(), 
+        key=lambda x: abs(x[1]), 
+        reverse=True
+    )[:3]
+    
+    primary_factors = []
+    factor_details = {}
+    
+    for feature, contribution in sorted_factors:
+        # Skip if contribution is negligible
+        if abs(contribution) < 0.01:
+            continue
+            
+        # Generate human-readable explanation
+        explanation = _explain_feature_impact(feature, contribution, input_data.get(feature))
+        primary_factors.append(explanation['summary'])
+        
+        factor_details[feature] = FactorDetail(
+            value=input_data.get(feature),
+            contribution=round(float(contribution), 4),
+            impact=explanation['impact'],
+            context=explanation['context']
+        )
+    
+    # Build personalized recommendation
+    personalized_recommendation = _build_recommendation(
+        risk_level, primary_factors, input_data
+    )
+    
+    return RiskExplanation(
+        risk_level=risk_level,
+        primary_factors=primary_factors,
+        factor_details=factor_details,
+        recommendation=personalized_recommendation,
+        confidence_score=round(float(max(proba, 1 - proba)), 4)
+    )
+
 
 def _add_missing_features(df: pd.DataFrame) -> pd.DataFrame:
     """Add missing features with sensible defaults."""
@@ -236,7 +485,7 @@ def _transform_for_prediction(df: pd.DataFrame) -> pd.DataFrame:
 
 
 def _predict_single(input_data: dict) -> ChurnPredictionResponse:
-    """Make a single prediction."""
+    """Make a single prediction with risk explanation."""
     # Convert to DataFrame
     df_input = pd.DataFrame([input_data])
     
@@ -254,25 +503,25 @@ def _predict_single(input_data: dict) -> ChurnPredictionResponse:
     threshold = _config.get('optimal_threshold', 0.5) if _config else 0.5
     prediction = int(proba >= threshold)
     
-    # Business logic
-    if proba >= 0.7:
-        risk_level = "High"
-        action = "Offer retention discount immediately"
-    elif proba >= 0.4:
-        risk_level = "Medium"
-        action = "Send engagement email"
-    else:
-        risk_level = "Low"
-        action = "No action needed"
+    # ✅ Generate risk explanation
+    risk_explanation = _calculate_risk_explanation(
+        proba=proba,
+        input_data=input_data,
+        feature_names=_feature_names,
+        model=_model,
+        X_transformed=X_transformed
+    )
     
     return ChurnPredictionResponse(
         customer_id=input_data.get('customer_id'),
         churn_probability=round(proba, 4),
         prediction="Yes" if prediction == 1 else "No",
-        risk_level=risk_level,
-        confidence=round(max(proba, 1 - proba), 4),
-        recommended_action=action,
-        timestamp=datetime.now().isoformat()
+        risk_level=risk_explanation.risk_level,
+        risk_explanation=risk_explanation,
+        confidence=risk_explanation.confidence_score,
+        recommended_action=risk_explanation.recommendation,
+        timestamp=datetime.now().isoformat(),
+        feature_contributions=risk_explanation.factor_details
     )
 
 
@@ -299,13 +548,14 @@ async def get_model_info():
         "model_type": type(_model).__name__ if _model else None,
         "feature_count": len(_feature_names) if _feature_names else 0,
         "optimal_threshold": _config.get('optimal_threshold', 0.5) if _config else 0.5,
-        "model_version": _config.get('model_version', 'unknown') if _config else 'unknown'
+        "model_version": _config.get('model_version', 'unknown') if _config else 'unknown',
+        "explainable": True  # ✅ New field
     }
 
 
 @app.post("/api/predict", response_model=ChurnPredictionResponse)
 async def predict_churn(request: ChurnPredictionRequest):
-    """Predict churn probability for a single customer."""
+    """Predict churn probability with explainable risk scoring."""
     try:
         input_data = request.dict(exclude_unset=True)
         result = _predict_single(input_data)
@@ -332,7 +582,7 @@ async def predict_churn_batch(request: BatchPredictionRequest):
     
     - Accepts up to 100 predictions per request
     - Processes requests in parallel for efficiency
-    - Returns results with error tracking
+    - Returns results with error tracking and risk explanations
     """
     start_time = time.time()
     results = []
@@ -360,9 +610,17 @@ async def predict_churn_batch(request: BatchPredictionRequest):
                 churn_probability=0.0,
                 prediction="Error",
                 risk_level="Unknown",
+                risk_explanation=RiskExplanation(
+                    risk_level="Unknown",
+                    primary_factors=["Validation failed"],
+                    factor_details={},
+                    recommendation="Fix input data and retry",
+                    confidence_score=0.0
+                ),
                 confidence=0.0,
                 recommended_action="Validation failed",
-                timestamp=datetime.now().isoformat()
+                timestamp=datetime.now().isoformat(),
+                feature_contributions={}
             ))
             
         except Exception as e:
@@ -379,9 +637,17 @@ async def predict_churn_batch(request: BatchPredictionRequest):
                 churn_probability=0.0,
                 prediction="Error",
                 risk_level="Unknown",
+                risk_explanation=RiskExplanation(
+                    risk_level="Unknown",
+                    primary_factors=["Prediction error"],
+                    factor_details={},
+                    recommendation="Retry prediction or contact support",
+                    confidence_score=0.0
+                ),
                 confidence=0.0,
                 recommended_action="Prediction failed",
-                timestamp=datetime.now().isoformat()
+                timestamp=datetime.now().isoformat(),
+                feature_contributions={}
             ))
     
     processing_time = (time.time() - start_time) * 1000  # Convert to ms

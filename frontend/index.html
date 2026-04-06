@@ -12,6 +12,7 @@
             --danger: #dc2626;
             --bg: #f8fafc;
             --card: #ffffff;
+            --border: #e2e8f0;
         }
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
@@ -19,9 +20,10 @@
             margin: 0;
             padding: 20px;
             color: #1e293b;
+            line-height: 1.5;
         }
         .container {
-            max-width: 900px;
+            max-width: 1000px;
             margin: 0 auto;
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -36,16 +38,23 @@
             border-radius: 12px;
             box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
         }
-        h1 { grid-column: 1 / -1; text-align: center; color: var(--primary); }
+        h1 { grid-column: 1 / -1; text-align: center; color: var(--primary); margin-bottom: 24px; }
+        h2 { margin-top: 0; color: #334155; border-bottom: 2px solid var(--border); padding-bottom: 12px; }
         .form-group { margin-bottom: 16px; }
-        label { display: block; margin-bottom: 6px; font-weight: 600; font-size: 14px; }
+        label { display: block; margin-bottom: 6px; font-weight: 600; font-size: 14px; color: #475569; }
         input, select {
             width: 100%;
-            padding: 10px;
+            padding: 10px 12px;
             border: 1px solid #cbd5e1;
             border-radius: 6px;
             font-size: 14px;
             box-sizing: border-box;
+            transition: border-color 0.2s;
+        }
+        input:focus, select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
         }
         button {
             width: 100%;
@@ -55,11 +64,14 @@
             border: none;
             border-radius: 6px;
             font-weight: 600;
+            font-size: 14px;
             cursor: pointer;
             transition: background 0.2s;
         }
         button:hover { background: #1d4ed8; }
         button:disabled { background: #94a3b8; cursor: not-allowed; }
+        
+        /* Result Styles */
         .result {
             margin-top: 20px;
             padding: 16px;
@@ -70,9 +82,153 @@
         .result.high { background: #fef2f2; border-left: 4px solid var(--danger); }
         .result.medium { background: #fefce8; border-left: 4px solid var(--warning); }
         .result.low { background: #f0fdf4; border-left: 4px solid var(--success); }
-        .metric { display: flex; justify-content: space-between; margin-bottom: 8px; }
-        .metric-value { font-weight: 700; }
-        .loading { text-align: center; display: none; margin-top: 10px; }
+        .metric { display: flex; justify-content: space-between; margin-bottom: 8px; padding: 4px 0; }
+        .metric-value { font-weight: 700; color: #1e293b; }
+        .loading { text-align: center; display: none; margin-top: 10px; color: #64748b; }
+        
+        /* Risk Explanation Styles */
+        .risk-explanation {
+            margin-top: 20px;
+            padding: 16px;
+            background: #f8fafc;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            display: none;
+        }
+        .risk-explanation h3 {
+            margin: 0 0 16px 0;
+            color: #334155;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .explanation-section {
+            margin-bottom: 16px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid var(--border);
+        }
+        .explanation-section:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+        .explanation-section h4 {
+            margin: 0 0 12px 0;
+            font-size: 14px;
+            color: #475569;
+            font-weight: 600;
+        }
+        .factor-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        .factor-list li {
+            padding: 8px 0;
+            border-bottom: 1px solid #f1f5f9;
+            font-size: 14px;
+            color: #334155;
+        }
+        .factor-list li:last-child {
+            border-bottom: none;
+        }
+        .factor-list li::before {
+            content: "• ";
+            color: var(--primary);
+            font-weight: bold;
+        }
+        .factor-details {
+            display: grid;
+            gap: 10px;
+        }
+        .factor-detail {
+            background: white;
+            padding: 12px;
+            border-radius: 6px;
+            border: 1px solid var(--border);
+            font-size: 13px;
+        }
+        .factor-detail strong {
+            display: block;
+            margin-bottom: 4px;
+            color: #1e293b;
+            font-size: 14px;
+        }
+        .factor-detail .value {
+            color: #64748b;
+            display: block;
+            margin-bottom: 6px;
+        }
+        .factor-detail .impact {
+            display: inline-block;
+            padding: 3px 10px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .impact.increases {
+            background: #fef2f2;
+            color: #dc2626;
+        }
+        .impact.decreases {
+            background: #f0fdf4;
+            color: #16a34a;
+        }
+        .factor-detail .context {
+            margin-top: 8px;
+            color: #64748b;
+            font-style: italic;
+            font-size: 12px;
+            line-height: 1.4;
+        }
+        .recommendation {
+            background: #eff6ff;
+            padding: 12px 16px;
+            border-radius: 6px;
+            border-left: 3px solid var(--primary);
+            font-size: 14px;
+            color: #1e40af;
+            line-height: 1.5;
+        }
+        .confidence-bar {
+            height: 24px;
+            background: #e2e8f0;
+            border-radius: 12px;
+            overflow: hidden;
+            position: relative;
+            margin-top: 8px;
+        }
+        .confidence-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #3b82f6, #60a5fa);
+            border-radius: 12px;
+            transition: width 0.4s ease;
+        }
+        .confidence-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: white;
+            font-weight: 600;
+            font-size: 12px;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+        }
+        .placeholder {
+            text-align: center;
+            color: #94a3b8;
+            margin-top: 40px;
+            padding: 20px;
+        }
+        .timestamp {
+            margin-top: 16px;
+            font-size: 12px;
+            color: #64748b;
+            text-align: right;
+        }
     </style>
 </head>
 <body>
@@ -84,7 +240,7 @@
             <h2>Customer Details</h2>
             <form id="churnForm">
                 <div class="form-group">
-                    <label>Contract Type</label>
+                    <label for="contract">Contract Type *</label>
                     <select id="contract" required>
                         <option value="Month-to-Month">Month-to-Month</option>
                         <option value="One Year">One Year</option>
@@ -92,15 +248,15 @@
                     </select>
                 </div>
                 <div class="form-group">
-                    <label>Tenure (Months)</label>
-                    <input type="number" id="tenure" value="24" min="0" required>
+                    <label for="tenure">Tenure (Months) *</label>
+                    <input type="number" id="tenure" value="24" min="0" max="120" required>
                 </div>
                 <div class="form-group">
-                    <label>Monthly Charge ($)</label>
+                    <label for="charge">Monthly Charge ($) *</label>
                     <input type="number" id="charge" value="79.50" step="0.01" min="0" required>
                 </div>
                 <div class="form-group">
-                    <label>Internet Service</label>
+                    <label for="internet">Internet Service *</label>
                     <select id="internet" required>
                         <option value="Fiber Optic">Fiber Optic</option>
                         <option value="DSL">DSL</option>
@@ -108,14 +264,14 @@
                     </select>
                 </div>
                 <div class="form-group">
-                    <label>Online Security</label>
+                    <label for="security">Online Security *</label>
                     <select id="security" required>
                         <option value="No">No</option>
                         <option value="Yes">Yes</option>
                     </select>
                 </div>
                 <button type="submit" id="submitBtn">Predict Churn</button>
-                <div class="loading" id="loading">Analyzing...</div>
+                <div class="loading" id="loading">🔄 Analyzing customer data...</div>
             </form>
         </div>
 
@@ -136,21 +292,50 @@
                     <span class="metric-value" id="risk">-</span>
                 </div>
                 <div class="metric">
-                    <span>Action:</span>
-                    <span class="metric-value" id="action" style="font-size: 12px;">-</span>
+                    <span>Recommended Action:</span>
+                    <span class="metric-value" id="action" style="font-size: 12px; text-align: right;">-</span>
                 </div>
-                <div style="margin-top: 16px; font-size: 12px; color: #64748b;">
+                <div class="timestamp">
                     Timestamp: <span id="timestamp">-</span>
                 </div>
             </div>
-            <div id="placeholder" style="text-align: center; color: #94a3b8; margin-top: 40px;">
-                Fill form to see prediction
+            
+            <!-- Risk Explanation Section -->
+            <div id="risk-explanation" class="risk-explanation">
+                <h3>🔍 Why This Risk Level?</h3>
+                
+                <div class="explanation-section">
+                    <h4>Primary Factors</h4>
+                    <ul id="primary-factors" class="factor-list"></ul>
+                </div>
+                
+                <div class="explanation-section">
+                    <h4>Factor Details</h4>
+                    <div id="factor-details" class="factor-details"></div>
+                </div>
+                
+                <div class="explanation-section">
+                    <h4>💡 Personalized Recommendation</h4>
+                    <p id="personalized-recommendation" class="recommendation"></p>
+                </div>
+                
+                <div class="explanation-section">
+                    <h4>📊 Model Confidence</h4>
+                    <div class="confidence-bar">
+                        <div id="confidence-fill" class="confidence-fill"></div>
+                        <span id="confidence-text" class="confidence-text"></span>
+                    </div>
+                </div>
+            </div>
+            
+            <div id="placeholder" class="placeholder">
+                Fill in customer details to see churn prediction
             </div>
         </div>
     </div>
 
     <script>
-        // API Base URL (Relative for production, works with FastAPI static serving locally)
+        // API Base URL (works for both local dev and production)
         const API_BASE = window.location.origin;
 
         document.getElementById('churnForm').addEventListener('submit', async (e) => {
@@ -159,20 +344,26 @@
             const btn = document.getElementById('submitBtn');
             const loading = document.getElementById('loading');
             const result = document.getElementById('result');
+            const explanation = document.getElementById('risk-explanation');
             const placeholder = document.getElementById('placeholder');
             
+            // Show loading state
             btn.disabled = true;
             loading.style.display = 'block';
             result.style.display = 'none';
+            explanation.style.display = 'none';
             placeholder.style.display = 'none';
 
+            // Build payload with all required fields
             const payload = {
+                // User-provided fields
                 contract: document.getElementById('contract').value,
                 tenure_in_months: parseInt(document.getElementById('tenure').value),
                 monthly_charge: parseFloat(document.getElementById('charge').value),
                 internet_service: document.getElementById('internet').value,
                 online_security: document.getElementById('security').value,
-                // Defaults for other required fields
+                
+                // Default values for other required fields
                 gender: "Male",
                 age: 35,
                 senior_citizen: "No",
@@ -181,7 +372,25 @@
                 payment_method: "Bank Withdrawal",
                 online_backup: "Yes",
                 streaming_tv: "Yes",
-                total_charges: parseFloat(document.getElementById('charge').value) * parseInt(document.getElementById('tenure').value)
+                total_charges: parseFloat(document.getElementById('charge').value) * parseInt(document.getElementById('tenure').value),
+                under_30: "No",
+                phone_service: "Yes",
+                multiple_lines: "No",
+                internet_type: "Fiber Optic",
+                device_protection_plan: "No",
+                premium_tech_support: "No",
+                streaming_movies: "No",
+                streaming_music: "No",
+                paperless_billing: "Yes",
+                referred_a_friend: "No",
+                number_of_referrals: 0,
+                offer: "Offer A",
+                unlimited_data: "No",
+                satisfaction_score: 3,
+                avg_monthly_long_distance_charges: 0.0,
+                total_long_distance_charges: 0.0,
+                avg_monthly_gb_download: 50.0,
+                total_extra_data_charges: 0.0
             };
 
             try {
@@ -191,22 +400,79 @@
                     body: JSON.stringify(payload)
                 });
 
-                if (!response.ok) throw new Error(`API Error: ${response.status}`);
+                if (!response.ok) {
+                    const errorData = await response.json().catch(() => ({}));
+                    throw new Error(`API Error ${response.status}: ${errorData.detail || response.statusText}`);
+                }
 
                 const data = await response.json();
                 
+                // Update main result
                 document.getElementById('probability').textContent = (data.churn_probability * 100).toFixed(1) + '%';
                 document.getElementById('prediction').textContent = data.prediction;
                 document.getElementById('risk').textContent = data.risk_level;
                 document.getElementById('action').textContent = data.recommended_action;
                 document.getElementById('timestamp').textContent = new Date(data.timestamp).toLocaleString();
 
+                // Style result based on risk level
                 result.className = 'result ' + data.risk_level.toLowerCase();
                 result.style.display = 'block';
+                
+                // ✅ Display risk explanation if available
+                if (data.risk_explanation) {
+                    const exp = data.risk_explanation;
+                    
+                    // Primary factors
+                    const factorsList = document.getElementById('primary-factors');
+                    factorsList.innerHTML = '';
+                    exp.primary_factors.forEach(factor => {
+                        const li = document.createElement('li');
+                        li.textContent = factor;
+                        factorsList.appendChild(li);
+                    });
+                    
+                    // Factor details
+                    const detailsContainer = document.getElementById('factor-details');
+                    detailsContainer.innerHTML = '';
+                    
+                    if (Object.keys(exp.factor_details).length > 0) {
+                        Object.entries(exp.factor_details).forEach(([feature, detail]) => {
+                            const div = document.createElement('div');
+                            div.className = 'factor-detail';
+                            
+                            const impactClass = detail.impact === 'increases risk' ? 'increases' : 'decreases';
+                            
+                            div.innerHTML = `
+                                <strong>${feature.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}</strong>
+                                <span class="value">Value: ${detail.value}</span>
+                                <span class="impact ${impactClass}">${detail.impact}</span>
+                                <div class="context">${detail.context}</div>
+                            `;
+                            detailsContainer.appendChild(div);
+                        });
+                    } else {
+                        detailsContainer.innerHTML = '<p style="color:#64748b;font-size:13px;">No significant factors identified</p>';
+                    }
+                    
+                    // Personalized recommendation
+                    document.getElementById('personalized-recommendation').textContent = exp.recommendation;
+                    
+                    // Confidence bar
+                    const confidence = exp.confidence_score * 100;
+                    document.getElementById('confidence-fill').style.width = `${confidence}%`;
+                    document.getElementById('confidence-text').textContent = `${confidence.toFixed(0)}% confident`;
+                    
+                    // Show explanation section
+                    explanation.style.display = 'block';
+                }
+                
             } catch (error) {
+                console.error('Prediction error:', error);
                 alert('Prediction failed: ' + error.message);
                 placeholder.style.display = 'block';
+                placeholder.innerHTML = `❌ Error: ${error.message}<br><small>Check console for details</small>`;
             } finally {
+                // Reset loading state
                 btn.disabled = false;
                 loading.style.display = 'none';
             }

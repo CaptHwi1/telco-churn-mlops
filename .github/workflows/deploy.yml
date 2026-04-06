@@ -11,7 +11,7 @@ on:
       - 'requirements.txt'
       - 'pyproject.toml'
       - '.github/workflows/deploy.yml'
-  workflow_dispatch:  # Allow manual trigger
+  workflow_dispatch:
 
 env:
   REGISTRY: swr.ap-southeast-1.myhuaweicloud.com
@@ -20,149 +20,89 @@ env:
   REGION: ap-southeast-1
 
 jobs:
-  # ---------------------------------------------------------------------------
-  # Job 1: Validate Artifacts
-  # ---------------------------------------------------------------------------
   validate:
     name: Validate Artifacts
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-      
+      - uses: actions/checkout@v4
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.10'
-      
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
           pip install pandas numpy scikit-learn xgboost joblib
-      
       - name: Validate required artifacts
         run: |
           echo "🔍 Checking required files..."
-          
-          if [ ! -f "artifacts/model.pkl" ]; then
-            echo "❌ ERROR: artifacts/model.pkl not found!"
-            exit 1
-          fi
-          if [ ! -f "artifacts/preprocessing_pipeline.joblib" ]; then
-            echo "❌ ERROR: artifacts/preprocessing_pipeline.joblib not found!"
-            exit 1
-          fi
-          if [ ! -f "artifacts/serving_config.json" ]; then
-            echo "❌ ERROR: artifacts/serving_config.json not found!"
-            exit 1
-          fi
-          if [ ! -f "docker/Dockerfile" ]; then
-            echo "❌ ERROR: docker/Dockerfile not found!"
-            exit 1
-          fi
-          if [ ! -f "requirements.txt" ]; then
-            echo "❌ ERROR: requirements.txt not found!"
-            exit 1
-          fi
-          
+          test -f artifacts/model.pkl || { echo "❌ model.pkl missing"; exit 1; }
+          test -f artifacts/preprocessing_pipeline.joblib || { echo "❌ preprocessing missing"; exit 1; }
+          test -f artifacts/serving_config.json || { echo "❌ serving_config.json missing"; exit 1; }
+          test -f docker/Dockerfile || { echo "❌ Dockerfile missing"; exit 1; }
+          test -f requirements.txt || { echo "❌ requirements.txt missing"; exit 1; }
           echo "✅ All required files present!"
-          echo "📦 Model size: $(du -h artifacts/model.pkl | cut -f1)"
 
-  # ---------------------------------------------------------------------------
-  # Job 2: Build & Push Docker Image (FIXED - Classic Docker)
-  # ---------------------------------------------------------------------------
   build-and-push:
-# ---------------------------------------------------------------------------
-# Job 2: Build & Push Docker Image (FIXED - No Buildx Conflicts)
-# ---------------------------------------------------------------------------
-build-and-push:
-  name: Build & Push to Huawei SWR
-  runs-on: ubuntu-latest
-  needs: validate
-  permissions:
-    contents: read
+    name: Build & Push to Huawei SWR
+    runs-on: ubuntu-latest
+    needs: validate
+    permissions:
+      contents: read
 
-  steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-    # ✅ FIX: Use pre-installed Docker (no setup-buildx-action)
-    - name: Verify Docker is available
-      run: |
-        docker --version
-        docker info
+      # ✅ Use pre-installed Docker
+      - name: Verify Docker
+        run: docker --version
 
-    - name: Login to Huawei SWR
-      uses: docker/login-action@v3
-      with:
-        registry: ${{ env.REGISTRY }}
-        username: ${{ secrets.HUAWEI_SWR_USERNAME }}
-        password: ${{ secrets.HUAWEI_SWR_PASSWORD }}
+      - name: Login to Huawei SWR
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ secrets.HUAWEI_SWR_USERNAME }}
+          password: ${{ secrets.HUAWEI_SWR_PASSWORD }}
 
-    - name: Extract metadata
-      id: meta
-      uses: docker/metadata-action@v5
-      with:
-        images: ${{ env.REGISTRY }}/${{ env.ORG }}/${{ env.APP }}
-        tags: |
-          type=sha,prefix=sha-
-          type=raw,value=latest,enable={{is_default_branch}}
-          type=raw,value=v1.0.0,enable={{is_default_branch}}
+      - name: Extract metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.ORG }}/${{ env.APP }}
+          tags: |
+            type=sha,prefix=sha-
+            type=raw,value=latest
+            type=raw,value=v1.0.0
 
-    # ✅ FIX: Use classic docker build (not buildx)
-    - name: Build Docker image
-      run: |
-        docker build \
-          -t ${{ env.REGISTRY }}/${{ env.ORG }}/${{ env.APP }}:latest \
-          -t ${{ env.REGISTRY }}/${{ env.ORG }}/${{ env.APP }}:sha-${{ github.sha }} \
-          -t ${{ env.REGISTRY }}/${{ env.ORG }}/${{ env.APP }}:v1.0.0 \
-          -f docker/Dockerfile \
-          --platform linux/amd64 \
-          .
+      # ✅ Classic docker build
+      - name: Build Docker image
+        run: |
+          docker build \
+            -t ${{ env.REGISTRY }}/${{ env.ORG }}/${{ env.APP }}:latest \
+            -t ${{ env.REGISTRY }}/${{ env.ORG }}/${{ env.APP }}:sha-${{ github.sha }} \
+            -t ${{ env.REGISTRY }}/${{ env.ORG }}/${{ env.APP }}:v1.0.0 \
+            -f docker/Dockerfile \
+            --platform linux/amd64 \
+            .
 
-    # ✅ FIX: Push with classic docker push
-    - name: Push to Huawei SWR
-      run: |
-        docker push ${{ env.REGISTRY }}/${{ env.ORG }}/${{ env.APP }}:latest
-        docker push ${{ env.REGISTRY }}/${{ env.ORG }}/${{ env.APP }}:sha-${{ github.sha }}
-        docker push ${{ env.REGISTRY }}/${{ env.ORG }}/${{ env.APP }}:v1.0.0
-        echo "✅ Push complete"
+      # ✅ Classic docker push
+      - name: Push to Huawei SWR
+        run: |
+          docker push ${{ env.REGISTRY }}/${{ env.ORG }}/${{ env.APP }}:latest
+          docker push ${{ env.REGISTRY }}/${{ env.ORG }}/${{ env.APP }}:sha-${{ github.sha }}
+          docker push ${{ env.REGISTRY }}/${{ env.ORG }}/${{ env.APP }}:v1.0.0
 
-    - name: Image pushed successfully
-      run: |
-        echo "✅ Docker image built and pushed successfully!"
-        echo "📦 Image: ${{ env.REGISTRY }}/${{ env.ORG }}/${{ env.APP }}:latest"
-        echo "🔗 SWR Console: https://console.huaweicloud.com/swr/"
+      - name: Success
+        run: echo "✅ Image pushed to SWR"
 
-  # ---------------------------------------------------------------------------
-  # Job 3: Deployment Summary
-  # ---------------------------------------------------------------------------
   summary:
     name: Deployment Summary
     runs-on: ubuntu-latest
     needs: build-and-push
     steps:
-      - name: Display deployment info
+      - name: Display info
         run: |
           echo "🎉 BUILD COMPLETE!"
-          echo "============================================================"
-          echo "📦 Docker Image:"
-          echo "   ${{ env.REGISTRY }}/${{ env.ORG }}/${{ env.APP }}:latest"
-          echo ""
-          echo "🔗 Huawei SWR Console:"
-          echo "   https://console.huaweicloud.com/swr/?region=${{ env.REGION }}"
-          echo ""
-          echo "📋 Next Steps for Manual CCE Deployment:"
-          echo "   1. Login to Huawei Cloud Console"
-          echo "   2. Go to CCE → Your cluster → Workloads"
-          echo "   3. Create/Update Deployment with image:"
-          echo "      ${{ env.REGISTRY }}/${{ env.ORG }}/${{ env.APP }}:latest"
-          echo "   4. Apply Kubernetes manifests from k8s/ folder"
-          echo ""
-          echo "⚠️  Create SWR pull secret in CCE first:"
-          echo "   kubectl create secret docker-registry swr-secret \\"
-          echo "     --docker-server=${{ env.REGISTRY }} \\"
-          echo "     --docker-username=<your-swr-username> \\"
-          echo "     --docker-password=<your-swr-password> \\"
-          echo "     -n telco-churn"
-          echo "============================================================"
+          echo "📦 Image: ${{ env.REGISTRY }}/${{ env.ORG }}/${{ env.APP }}:latest"
+          echo "🔗 SWR: https://console.huaweicloud.com/swr/?region=${{ env.REGION }}"

@@ -68,6 +68,10 @@ jobs:
           echo "✅ All required files present!"
           echo "📦 Model size: $(du -h artifacts/model.pkl | cut -f1)"
 
+  # ---------------------------------------------------------------------------
+  # Job 2: Build & Push Docker Image (FIXED - Classic Docker)
+  # ---------------------------------------------------------------------------
+  build-and-push:
 # ---------------------------------------------------------------------------
 # Job 2: Build & Push Docker Image (FIXED - No Buildx Conflicts)
 # ---------------------------------------------------------------------------

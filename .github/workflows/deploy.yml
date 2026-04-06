@@ -68,49 +68,67 @@ jobs:
           echo "✅ All required files present!"
           echo "📦 Model size: $(du -h artifacts/model.pkl | cut -f1)"
 
-  # ---------------------------------------------------------------------------
-  # Job 2: Build & Push Docker Image (FIXED - Classic Docker)
-  # ---------------------------------------------------------------------------
-  build-and-push:
-    name: Build & Push to Huawei SWR
-    runs-on: ubuntu-latest
-    needs: validate
+# ---------------------------------------------------------------------------
+# Job 2: Build & Push Docker Image (FIXED - No Buildx Conflicts)
+# ---------------------------------------------------------------------------
+build-and-push:
+  name: Build & Push to Huawei SWR
+  runs-on: ubuntu-latest
+  needs: validate
+  permissions:
+    contents: read
 
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+  steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
 
-      # ✅ FIX: Use Docker directly (no buildx)
-      - name: Set up Docker
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y docker.io
+    # ✅ FIX: Use pre-installed Docker (no setup-buildx-action)
+    - name: Verify Docker is available
+      run: |
+        docker --version
+        docker info
 
-      - name: Login to Huawei SWR
-        run: |
-          echo "${{ secrets.HUAWEI_SWR_PASSWORD }}" | \
-          docker login ${{ env.REGISTRY }} -u "${{ secrets.HUAWEI_SWR_USERNAME }}" --password-stdin
+    - name: Login to Huawei SWR
+      uses: docker/login-action@v3
+      with:
+        registry: ${{ env.REGISTRY }}
+        username: ${{ secrets.HUAWEI_SWR_USERNAME }}
+        password: ${{ secrets.HUAWEI_SWR_PASSWORD }}
 
-      - name: Build Docker image
-        run: |
-          docker build \
-            -t ${{ env.REGISTRY }}/${{ env.ORG }}/${{ env.APP }}:latest \
-            -t ${{ env.REGISTRY }}/${{ env.ORG }}/${{ env.APP }}:sha-${{ github.sha }} \
-            -f docker/Dockerfile \
-            --platform linux/amd64 \
-            .
+    - name: Extract metadata
+      id: meta
+      uses: docker/metadata-action@v5
+      with:
+        images: ${{ env.REGISTRY }}/${{ env.ORG }}/${{ env.APP }}
+        tags: |
+          type=sha,prefix=sha-
+          type=raw,value=latest,enable={{is_default_branch}}
+          type=raw,value=v1.0.0,enable={{is_default_branch}}
 
-      - name: Push to Huawei SWR
-        run: |
-          docker push ${{ env.REGISTRY }}/${{ env.ORG }}/${{ env.APP }}:latest
-          docker push ${{ env.REGISTRY }}/${{ env.ORG }}/${{ env.APP }}:sha-${{ github.sha }}
-          echo "✅ Push complete"
+    # ✅ FIX: Use classic docker build (not buildx)
+    - name: Build Docker image
+      run: |
+        docker build \
+          -t ${{ env.REGISTRY }}/${{ env.ORG }}/${{ env.APP }}:latest \
+          -t ${{ env.REGISTRY }}/${{ env.ORG }}/${{ env.APP }}:sha-${{ github.sha }} \
+          -t ${{ env.REGISTRY }}/${{ env.ORG }}/${{ env.APP }}:v1.0.0 \
+          -f docker/Dockerfile \
+          --platform linux/amd64 \
+          .
 
-      - name: Image pushed successfully
-        run: |
-          echo "✅ Docker image built and pushed successfully!"
-          echo "📦 Image: ${{ env.REGISTRY }}/${{ env.ORG }}/${{ env.APP }}:latest"
-          echo "🔗 SWR Console: https://console.huaweicloud.com/swr/"
+    # ✅ FIX: Push with classic docker push
+    - name: Push to Huawei SWR
+      run: |
+        docker push ${{ env.REGISTRY }}/${{ env.ORG }}/${{ env.APP }}:latest
+        docker push ${{ env.REGISTRY }}/${{ env.ORG }}/${{ env.APP }}:sha-${{ github.sha }}
+        docker push ${{ env.REGISTRY }}/${{ env.ORG }}/${{ env.APP }}:v1.0.0
+        echo "✅ Push complete"
+
+    - name: Image pushed successfully
+      run: |
+        echo "✅ Docker image built and pushed successfully!"
+        echo "📦 Image: ${{ env.REGISTRY }}/${{ env.ORG }}/${{ env.APP }}:latest"
+        echo "🔗 SWR Console: https://console.huaweicloud.com/swr/"
 
   # ---------------------------------------------------------------------------
   # Job 3: Deployment Summary

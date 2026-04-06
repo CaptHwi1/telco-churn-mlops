@@ -69,61 +69,43 @@ jobs:
           echo "📦 Model size: $(du -h artifacts/model.pkl | cut -f1)"
 
   # ---------------------------------------------------------------------------
-  # Job 2: Build & Push Docker Image (FIXED for SWR)
+  # Job 2: Build & Push Docker Image (FIXED - Classic Docker)
   # ---------------------------------------------------------------------------
   build-and-push:
     name: Build & Push to Huawei SWR
     runs-on: ubuntu-latest
     needs: validate
-    permissions:
-      contents: read
-    
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-      
-      # Use classic Docker instead of buildx for SWR compatibility
+
+      # ✅ FIX: Use Docker directly (no buildx)
       - name: Set up Docker
-        uses: docker/setup-docker-action@v3
-      
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y docker.io
+
       - name: Login to Huawei SWR
-        uses: docker/login-action@v3
-        with:
-          registry: ${{ env.REGISTRY }}
-          username: ${{ secrets.HUAWEI_SWR_USERNAME }}
-          password: ${{ secrets.HUAWEI_SWR_PASSWORD }}
-      
-      - name: Extract metadata
-        id: meta
-        uses: docker/metadata-action@v5
-        with:
-          images: ${{ env.REGISTRY }}/${{ env.ORG }}/${{ env.APP }}
-          tags: |
-            type=sha,prefix=sha-
-            type=raw,value=latest,enable={{is_default_branch}}
-            type=raw,value=v1.0.0,enable={{is_default_branch}}
-      
-      # ✅ FIX: Build with classic docker build (not buildx)
+        run: |
+          echo "${{ secrets.HUAWEI_SWR_PASSWORD }}" | \
+          docker login ${{ env.REGISTRY }} -u "${{ secrets.HUAWEI_SWR_USERNAME }}" --password-stdin
+
       - name: Build Docker image
         run: |
-          echo "🔨 Building Docker image with classic builder..."
           docker build \
             -t ${{ env.REGISTRY }}/${{ env.ORG }}/${{ env.APP }}:latest \
             -t ${{ env.REGISTRY }}/${{ env.ORG }}/${{ env.APP }}:sha-${{ github.sha }} \
-            -t ${{ env.REGISTRY }}/${{ env.ORG }}/${{ env.APP }}:v1.0.0 \
             -f docker/Dockerfile \
             --platform linux/amd64 \
             .
-      
-      # ✅ FIX: Push with docker push command (more reliable for SWR)
+
       - name: Push to Huawei SWR
         run: |
-          echo "📤 Pushing image to Huawei SWR..."
           docker push ${{ env.REGISTRY }}/${{ env.ORG }}/${{ env.APP }}:latest
           docker push ${{ env.REGISTRY }}/${{ env.ORG }}/${{ env.APP }}:sha-${{ github.sha }}
-          docker push ${{ env.REGISTRY }}/${{ env.ORG }}/${{ env.APP }}:v1.0.0
           echo "✅ Push complete"
-      
+
       - name: Image pushed successfully
         run: |
           echo "✅ Docker image built and pushed successfully!"

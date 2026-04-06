@@ -22,8 +22,8 @@ RUN echo 'server { \
     listen 80; \
     server_name localhost; \
     location / { root /app/frontend; try_files $uri $uri/ /index.html; } \
-    location /api/ { proxy_pass http://127.0.0.1:8000/; proxy_set_header Host $host; } \
-    location /health { proxy_pass http://127.0.0.1:8000/health; } \
+    location /api/ { proxy_pass http://0.0.0.0:8000/; proxy_set_header Host $host; } \
+    location /health { proxy_pass http://0.0.0.0:8000/health; } \
 }' > /etc/nginx/conf.d/default.conf && \
     sed -i 's/daemon off;/# daemon off;/' /etc/nginx/nginx.conf
 
@@ -42,4 +42,4 @@ EXPOSE 80
 HEALTHCHECK --interval=30s --timeout=10s --start-period=15s --retries=3 \
     CMD curl -f http://localhost:80/health || exit 1
 
-CMD ["sh", "-c", "gunicorn src.serving.api:app --bind 127.0.0.1:8000 --workers 2 --worker-class uvicorn.workers.UvicornWorker & nginx -g 'daemon off;'"]
+CMD ["sh", "-c", "gunicorn src.serving.api:app --bind 0.0.0.0:8000 --workers 2 --worker-class uvicorn.workers.UvicornWorker & nginx -g 'daemon off;'"]

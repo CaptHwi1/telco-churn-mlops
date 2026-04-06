@@ -44,30 +44,22 @@ jobs:
         run: |
           echo "🔍 Checking required files..."
           
-          # Check model files
           if [ ! -f "artifacts/model.pkl" ]; then
             echo "❌ ERROR: artifacts/model.pkl not found!"
-            echo "   Please run baseline_model.ipynb or hyperparameter_tuning.ipynb first"
             exit 1
           fi
-          
           if [ ! -f "artifacts/preprocessing_pipeline.joblib" ]; then
             echo "❌ ERROR: artifacts/preprocessing_pipeline.joblib not found!"
             exit 1
           fi
-          
           if [ ! -f "artifacts/serving_config.json" ]; then
             echo "❌ ERROR: artifacts/serving_config.json not found!"
             exit 1
           fi
-          
-          # Check Dockerfile
           if [ ! -f "docker/Dockerfile" ]; then
             echo "❌ ERROR: docker/Dockerfile not found!"
             exit 1
           fi
-          
-          # Check requirements
           if [ ! -f "requirements.txt" ]; then
             echo "❌ ERROR: requirements.txt not found!"
             exit 1
@@ -75,10 +67,9 @@ jobs:
           
           echo "✅ All required files present!"
           echo "📦 Model size: $(du -h artifacts/model.pkl | cut -f1)"
-          echo "📦 Preprocessing size: $(du -h artifacts/preprocessing_pipeline.joblib | cut -f1)"
 
   # ---------------------------------------------------------------------------
-  # Job 2: Build & Push Docker Image
+  # Job 2: Build & Push Docker Image (FIXED for SWR)
   # ---------------------------------------------------------------------------
   build-and-push:
     name: Build & Push to Huawei SWR
@@ -91,8 +82,9 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
       
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
+      # ✅ FIX: Use classic Docker instead of buildx for SWR compatibility
+      - name: Set up Docker
+        uses: docker/setup-docker-action@v1
       
       - name: Login to Huawei SWR
         uses: docker/login-action@v3
@@ -111,34 +103,35 @@ jobs:
             type=raw,value=latest,enable={{is_default_branch}}
             type=raw,value=v1.0.0,enable={{is_default_branch}}
       
-      - name: Build and push Docker image
-        uses: docker/build-push-action@v5
-        with:
-          context: .
-          file: docker/Dockerfile
-          push: true
-          tags: ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
-          build-args: |
-            BUILD_DATE=${{ github.event.head_commit.timestamp }}
-            VCS_REF=${{ github.sha }}
-            VERSION=${{ steps.meta.outputs.version }}
+      # ✅ FIX: Build with classic docker build (not buildx)
+      - name: Build Docker image
+        run: |
+          echo "🔨 Building Docker image with classic builder..."
+          docker build \
+            -t ${{ env.REGISTRY }}/${{ env.ORG }}/${{ env.APP }}:latest \
+            -t ${{ env.REGISTRY }}/${{ env.ORG }}/${{ env.APP }}:sha-${{ github.sha }} \
+            -t ${{ env.REGISTRY }}/${{ env.ORG }}/${{ env.APP }}:v1.0.0 \
+            -f docker/Dockerfile \
+            --platform linux/amd64 \
+            .
       
-      - name: Image built successfully
+      # ✅ FIX: Push with docker push command (more reliable for SWR)
+      - name: Push to Huawei SWR
+        run: |
+          echo "📤 Pushing image to Huawei SWR..."
+          docker push ${{ env.REGISTRY }}/${{ env.ORG }}/${{ env.APP }}:latest
+          docker push ${{ env.REGISTRY }}/${{ env.ORG }}/${{ env.APP }}:sha-${{ github.sha }}
+          docker push ${{ env.REGISTRY }}/${{ env.ORG }}/${{ env.APP }}:v1.0.0
+          echo "✅ Push complete"
+      
+      - name: Image pushed successfully
         run: |
           echo "✅ Docker image built and pushed successfully!"
-          echo "📦 Image: ${{ env.REGISTRY }}/${{ env.ORG }}/${{ env.APP }}:${{ steps.meta.outputs.version }}"
+          echo "📦 Image: ${{ env.REGISTRY }}/${{ env.ORG }}/${{ env.APP }}:latest"
           echo "🔗 SWR Console: https://console.huaweicloud.com/swr/"
-          echo ""
-          echo "📋 Image Tags:"
-          echo "   - ${{ env.REGISTRY }}/${{ env.ORG }}/${{ env.APP }}:latest"
-          echo "   - ${{ env.REGISTRY }}/${{ env.ORG }}/${{ env.APP }}:sha-${{ github.sha }}"
-          echo "   - ${{ env.REGISTRY }}/${{ env.ORG }}/${{ env.APP }}:v1.0.0"
 
   # ---------------------------------------------------------------------------
-  # Job 3: Deployment Summary (Optional - Manual CCE Deploy)
+  # Job 3: Deployment Summary
   # ---------------------------------------------------------------------------
   summary:
     name: Deployment Summary
@@ -149,7 +142,6 @@ jobs:
         run: |
           echo "🎉 BUILD COMPLETE!"
           echo "============================================================"
-          echo ""
           echo "📦 Docker Image:"
           echo "   ${{ env.REGISTRY }}/${{ env.ORG }}/${{ env.APP }}:latest"
           echo ""
@@ -158,13 +150,12 @@ jobs:
           echo ""
           echo "📋 Next Steps for Manual CCE Deployment:"
           echo "   1. Login to Huawei Cloud Console"
-          echo "   2. Go to CCE (Cloud Container Engine)"
-          echo "   3. Select your cluster"
-          echo "   4. Create/Update Deployment with image:"
+          echo "   2. Go to CCE → Your cluster → Workloads"
+          echo "   3. Create/Update Deployment with image:"
           echo "      ${{ env.REGISTRY }}/${{ env.ORG }}/${{ env.APP }}:latest"
-          echo "   5. Apply Kubernetes manifests from k8s/ folder"
+          echo "   4. Apply Kubernetes manifests from k8s/ folder"
           echo ""
-          echo "⚠️  Remember to create SWR pull secret in CCE:"
+          echo "⚠️  Create SWR pull secret in CCE first:"
           echo "   kubectl create secret docker-registry swr-secret \\"
           echo "     --docker-server=${{ env.REGISTRY }} \\"
           echo "     --docker-username=<your-swr-username> \\"

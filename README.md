@@ -1,6 +1,6 @@
 # 📊 Telco Churn Prediction MLOps Platform
 
-[![Build & Deploy](https://github.com/your-username/telco-churn-mlops/actions/workflows/deploy.yml/badge.svg)](https://github.com/your-username/telco-churn-mlops/actions)
+[![Build & Deploy](https://github.com/your-username/telco-churn-mlops/actions/workflows/deploy.yml/badge.svg)](https://github.com/CaptHwi1/telco-churn-mlops/actions)
 [![API Version](https://img.shields.io/badge/version-1.1.0-blue.svg)](https://github.com/your-username/telco-churn-mlops/releases)
 [![Python Version](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.109.0-green.svg)](https://fastapi.tiangolo.com/)
@@ -1225,7 +1225,7 @@ SOFTWARE.
 
 - **Issues**: [GitHub Issues](https://github.com/CaptHwi1/telco-churn-mlops/issues)
 - **Discussions**: [GitHub Discussions](https://github.com/CaptHwi1/telco-churn-mlops/discussions)
-- **Email**: abdulmuiz@0a@gmail.com.com
+- **Email**: abdulmuiz0a@gmail.com.com
 - **Documentation**: [Wiki](https://github.com/CaptHwi1/telco-churn-mlops/wiki)
 
 ---

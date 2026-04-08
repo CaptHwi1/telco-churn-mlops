@@ -142,3 +142,7 @@ TypeError: 'dict' object is not callable
 2026-04-06 10:24:39,481 - src.serving.api - INFO - ✅ Batch complete: 2 processed, 0 errors, 136.81ms
 2026-04-06 10:28:26,104 - src.serving.api - INFO - 📦 Batch prediction request: 2 items
 2026-04-06 10:28:26,254 - src.serving.api - INFO - ✅ Batch complete: 2 processed, 0 errors, 150.01ms
+2026-04-08 17:19:31,668 - src.serving.api - INFO - Loading artifacts from: C:\Users\user\Desktop\Library\Work\Journey to Agentic_AI MLOps\Files\E2E project\Project churn\churn-scratch\deploy\github\artifacts
+2026-04-08 17:19:31,744 - src.serving.api - INFO - ✅ Preprocessing pipeline loaded | Features: 39
+2026-04-08 17:19:31,775 - src.serving.api - INFO - ✅ Serving config loaded
+2026-04-08 17:19:31,895 - src.serving.api - INFO - ✅ Model loaded from model.pkl

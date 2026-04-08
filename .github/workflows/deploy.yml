@@ -15,7 +15,7 @@ on:
 
 env:
   REGISTRY: swr.ap-southeast-1.myhuaweicloud.com
-  ORG: telco-churn
+  ORG: telco-churn-test
   APP: telco-churn-app
   REGION: ap-southeast-1
 
